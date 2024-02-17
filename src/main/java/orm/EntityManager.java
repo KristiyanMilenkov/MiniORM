@@ -6,6 +6,7 @@ import Annotations.Id;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -16,7 +17,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class EntityManager<E> implements DBContext<E> {
+    private final String INSERT_QUERY = "INSERT INTO %s(%s) VALUES(%s);";
     private final String UPDATE_QUERY = "UPDATE %s SET %s WHERE %s;";
+    private final String DELETE_QUERY = "DELETE FROM %s  WHERE 1 %s LIMIT 1;";
+    private final String SELECT_QUERY = "SELECT * FROM %s WHERE 1 %s %s;";
     private Connection connection;
 
     public EntityManager(Connection connection) {
@@ -111,24 +115,77 @@ public class EntityManager<E> implements DBContext<E> {
     }
 
     @Override
-    public Iterable find(Class table) {
-        return null;
+    public Iterable<E> find(Class<E> table) throws SQLException, InstantiationException, IllegalAccessException {
+        String query = String.format(SELECT_QUERY, this.getTableName(table), "", "");
+        ResultSet rs = connection.prepareStatement(query).executeQuery();
+
+        List<E> entities = new ArrayList<>();
+        while (rs.next()) {
+            E entity = table.newInstance();
+            this.fillEntity(table, rs, entity);
+            entities.add(entity);
+        }
+        return entities;
+    }
+    private void fillEntity(Class<E> table, ResultSet rs, E entity)
+            throws SQLException, IllegalAccessException {
+        Field[] fields = table.getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            this.fillField(field, entity, rs, field.getAnnotation(Column.class).name());
+        }
+    }
+    private void fillField(Field field, E entity, ResultSet rs, String fieldName)
+            throws SQLException, IllegalAccessException {
+        if (field.getType() == int.class || field.getType() == Integer.class) {
+            field.set(entity, rs.getInt(fieldName));
+        } else if (field.getType() == String.class) {
+            field.set(entity, rs.getString(fieldName));
+        } else if (field.getType() == Date.class) {
+            field.set(entity, rs.getDate(fieldName));
+        } else if (field.getType() == double.class || field.getType() == Double.class) {
+            field.set(entity, rs.getDouble(fieldName));
+        }
     }
 
     @Override
-    public Iterable find(Class table, String where) {
-        return null;
+    public Iterable<E> find(Class<E> table, String where) throws SQLException, InstantiationException, IllegalAccessException {
+        String query = String.format(SELECT_QUERY,
+                this.getTableName(table), (where != null ? " AND " + where : ""), "");
+        ResultSet rs = connection.prepareStatement(query).executeQuery();
+
+        List<E> entities = new ArrayList<>();
+        while (rs.next()) {
+            E entity = table.newInstance();
+            this.fillEntity(table, rs, entity);
+            entities.add(entity);
+        }
+        return entities;
     }
 
     @Override
-    public Object findFirst(Class table) {
-        return null;
+    public E findFirst(Class<E> table) throws SQLException, InstantiationException, IllegalAccessException {
+        String query = String.format(SELECT_QUERY, this.getTableName(table), "", "");
+        ResultSet rs = connection.prepareStatement(query).executeQuery();
+        E entity = table.newInstance();
+        if (rs.next()) {
+            this.fillEntity(table, rs, entity);
+        }
+        return entity;
     }
 
     @Override
-    public Object findFirst(Class table, String where) {
-        return null;
+    public E findFirst(Class<E> table, String where) throws SQLException, InstantiationException, IllegalAccessException {
+        String query = String.format(SELECT_QUERY,
+                this.getTableName(table), (where != null ? " AND " + where : ""), "LIMIT 1");
+        ResultSet rs = connection.prepareStatement(query).executeQuery();
+        E entity = table.newInstance();
+        if (rs.next()) {
+            this.fillEntity(table, rs, entity);
+        }
+        return entity;
     }
+
 
     private Field getIdColumn(Class<?> clazz) {
         Field[] declaredFields = clazz.getDeclaredFields();
