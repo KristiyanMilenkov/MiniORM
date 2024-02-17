@@ -16,6 +16,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+
 public class EntityManager<E> implements DBContext<E> {
     private final String INSERT_QUERY = "INSERT INTO %s(%s) VALUES(%s);";
     private final String UPDATE_QUERY = "UPDATE %s SET %s WHERE %s;";
@@ -26,13 +28,45 @@ public class EntityManager<E> implements DBContext<E> {
     public EntityManager(Connection connection) {
         this.connection = connection;
     }
+    public void doCreate(Class<E> entityClass) throws SQLException {
+        String tableName = this.getTableName(entityClass);
+        String fieldsWithTypes = getSQLFieldsWithTypes(entityClass);
+
+        String createQuery = String.format("CREATE TABLE %s (" +
+                "id INT PRIMARY KEY AUTO_INCREMENT, %s)",tableName, fieldsWithTypes);
+
+        connection.prepareStatement(createQuery).execute();
+    }
+
+    private String getSQLFieldsWithTypes(Class<E> entityClass) {
+      return Arrays.stream(entityClass.getDeclaredFields())
+                .filter(f -> !f.isAnnotationPresent(Id.class))
+                .filter(f -> f.isAnnotationPresent(Column.class))
+                .map(f -> {
+            String fieldName = f.getAnnotationsByType(Column.class)[0].name();
+            Class<?> type = f.getType();
+
+            String sqlType = "";
+            if (type == Integer.class || type == int.class){
+                sqlType = "INT";
+            }else if (type == Double.class){
+                sqlType = "DOUBLE";
+            }else if (type == String.class){
+                sqlType = "VARCHAR(200)";
+            }else if (type == LocalDate.class){
+                sqlType = "DATE";
+            }
+            return fieldName + " " + sqlType;
+        })
+        .collect(Collectors.joining(", "));
+    }
 
     @Override
     public boolean persist(E entity) throws IllegalAccessException, SQLException {
         Field primaryKey = getIdColumn(entity.getClass());
         primaryKey.setAccessible(true);
         Object primaryKeyValue = primaryKey.get(entity);
-        if (primaryKeyValue == null || (long) primaryKeyValue == 0) {
+        if (primaryKeyValue == null || (long) primaryKeyValue <= 0) {
             return doInsert(entity, primaryKey);
         }
         return doUpdate(entity, primaryKey);
@@ -198,6 +232,7 @@ public class EntityManager<E> implements DBContext<E> {
         throw new UnsupportedOperationException("Entity does not have primary key");
 
     }
+
 }
 
 

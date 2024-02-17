@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6382470d-94e4-4a60-8289-8eca4f5448d9" name="Changes" comment="Implemented some more methods" />
+    <list default="true" id="6382470d-94e4-4a60-8289-8eca4f5448d9" name="Changes" comment="Implemented some more methods">
+      <change beforePath="$PROJECT_DIR$/src/main/java/Entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Entities/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/orm/EntityManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/orm/EntityManager.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -86,7 +90,7 @@
       <workItem from="1707993194746" duration="6729000" />
       <workItem from="1708076982277" duration="729000" />
       <workItem from="1708078433347" duration="442000" />
-      <workItem from="1708079169274" duration="15700000" />
+      <workItem from="1708079169274" duration="19247000" />
     </task>
     <task id="LOCAL-00001" summary="First steps of creating Custom Mini ORM">
       <created>1708098406093</created>
@@ -102,7 +106,14 @@
       <option name="project" value="LOCAL" />
       <updated>1708172924864</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Implemented some more methods">
+      <created>1708173630973</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1708173630973</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

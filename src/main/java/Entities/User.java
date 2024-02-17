@@ -23,6 +23,9 @@ public class User {
         this.registrationDate = registrationDate;
     }
 
+    public User() {
+    }
+
     public long getId() {
         return id;
     }
