@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6382470d-94e4-4a60-8289-8eca4f5448d9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Annotations/Column.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Annotations/Column.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Annotations/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Annotations/Entity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Annotations/Id.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Annotations/Id.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Entities/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/orm/DBContext.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/orm/DBContext.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/orm/EntityManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/orm/EntityManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/orm/MyConnector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/orm/MyConnector.java" afterDir="false" />
-    </list>
+    <list default="true" id="6382470d-94e4-4a60-8289-8eca4f5448d9" name="Changes" comment="Implemented some more methods" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,6 +20,19 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="ffcbdb19-19ef-47e8-99d0-e1724436267a" />
+        <option name="url" value="https://github.com/KristiyanMilenkov/MiniORM.git" />
+      </UrlAndAccount>
+    </option>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -84,11 +86,31 @@
       <workItem from="1707993194746" duration="6729000" />
       <workItem from="1708076982277" duration="729000" />
       <workItem from="1708078433347" duration="442000" />
-      <workItem from="1708079169274" duration="13784000" />
+      <workItem from="1708079169274" duration="15700000" />
     </task>
+    <task id="LOCAL-00001" summary="First steps of creating Custom Mini ORM">
+      <created>1708098406093</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1708098406094</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Implemented some more methods">
+      <created>1708172924864</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1708172924864</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="First steps of creating Custom Mini ORM" />
+    <MESSAGE value="Implemented some more methods" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented some more methods" />
   </component>
 </project>
