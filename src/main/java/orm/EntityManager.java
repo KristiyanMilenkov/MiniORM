@@ -6,14 +6,12 @@ import Annotations.Id;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -28,37 +26,90 @@ public class EntityManager<E> implements DBContext<E> {
     public EntityManager(Connection connection) {
         this.connection = connection;
     }
+
     public void doCreate(Class<E> entityClass) throws SQLException {
         String tableName = this.getTableName(entityClass);
         String fieldsWithTypes = getSQLFieldsWithTypes(entityClass);
 
         String createQuery = String.format("CREATE TABLE %s (" +
-                "id INT PRIMARY KEY AUTO_INCREMENT, %s)",tableName, fieldsWithTypes);
+                "id INT PRIMARY KEY AUTO_INCREMENT, %s)", tableName, fieldsWithTypes);
 
         connection.prepareStatement(createQuery).execute();
     }
 
+    public void doAlter(Class<E> entityClass) throws SQLException {
+        String tableName = this.getTableName(entityClass);
+        String addColumnStatements = getAddColumnStatementsForNewFields(entityClass);
+
+        String alterQuery = String.format("ALTER TABLE %s %s", tableName, addColumnStatements);
+    }
+
+    private String getAddColumnStatementsForNewFields(Class<E> entityClass) throws SQLException {
+        Set<String> sqlColumns = getSQLColumnNames(entityClass);
+
+        List<Field> fields = Arrays.stream(entityClass.getDeclaredFields())
+                .filter(f -> !f.isAnnotationPresent(Id.class))
+                .filter(f -> f.isAnnotationPresent(Column.class))
+                .collect(Collectors.toList());
+
+        List<String> allAddStatements = new ArrayList<>();
+        for (Field field : fields) {
+            String fieldName = field.getAnnotationsByType(Column.class)[0].name();
+
+            if (sqlColumns.contains(fieldName)) {
+                continue;
+            }
+            String sqlType = getSqlType(field.getType());
+
+            String addStatement = String.format("ADD COLUMN %s %s", fieldName, sqlType);
+            allAddStatements.add(addStatement);
+
+        }
+        return String.join(", ", allAddStatements);
+
+    }
+
+    private Set<String> getSQLColumnNames(Class<E> entityClass) throws SQLException {
+        String schemaQuery = "SELECT column_name FROM information_schema.columns c " +
+                " WHERE c.table_name = custom-orm " +
+                " and column_name != id " +
+                " and table_name = users;";
+        PreparedStatement statement = connection.prepareStatement(schemaQuery);
+        ResultSet resultSet = statement.executeQuery();
+
+        Set<String> result = new HashSet<>();
+        while (resultSet.next()) {
+            String columnName = resultSet.getString("column_name");
+            result.add(columnName);
+        }
+        return result;
+    }
+
     private String getSQLFieldsWithTypes(Class<E> entityClass) {
-      return Arrays.stream(entityClass.getDeclaredFields())
+        return Arrays.stream(entityClass.getDeclaredFields())
                 .filter(f -> !f.isAnnotationPresent(Id.class))
                 .filter(f -> f.isAnnotationPresent(Column.class))
                 .map(f -> {
-            String fieldName = f.getAnnotationsByType(Column.class)[0].name();
-            Class<?> type = f.getType();
+                    String fieldName = f.getAnnotationsByType(Column.class)[0].name();
 
-            String sqlType = "";
-            if (type == Integer.class || type == int.class){
-                sqlType = "INT";
-            }else if (type == Double.class){
-                sqlType = "DOUBLE";
-            }else if (type == String.class){
-                sqlType = "VARCHAR(200)";
-            }else if (type == LocalDate.class){
-                sqlType = "DATE";
-            }
-            return fieldName + " " + sqlType;
-        })
-        .collect(Collectors.joining(", "));
+                    String sqlType = getSqlType(f.getType());
+                    return fieldName + " " + sqlType;
+                })
+                .collect(Collectors.joining(", "));
+    }
+
+    private static String getSqlType(Class<?> type) {
+        String sqlType = "";
+        if (type == Integer.class || type == int.class) {
+            sqlType = "INT";
+        } else if (type == Double.class) {
+            sqlType = "DOUBLE";
+        } else if (type == String.class) {
+            sqlType = "VARCHAR(200)";
+        } else if (type == LocalDate.class) {
+            sqlType = "DATE";
+        }
+        return sqlType;
     }
 
     @Override
@@ -83,7 +134,7 @@ public class EntityManager<E> implements DBContext<E> {
             field.setAccessible(true);
             if (field.getName().equals(primaryKey.getName())) {
                 where += field.getName() + " = " + field.get(entity).toString();
-            }else if (field.isAnnotationPresent(Column.class)) {
+            } else if (field.isAnnotationPresent(Column.class)) {
                 String str = "`" + field.getAnnotation(Column.class).name() + "` = ";
                 Object value = field.get(entity);
                 if (field.getType() == Date.class) {
@@ -99,14 +150,14 @@ public class EntityManager<E> implements DBContext<E> {
         }
         String query = String.format(UPDATE_QUERY, tableName, String.join(", ", values), where);
         return connection.prepareStatement(query).execute();
-        }
+    }
 
 
     private boolean doInsert(E entity, Field idColumn) throws SQLException, IllegalAccessException {
         String tableName = this.getTableName(entity.getClass());
         String tableFields = getColumnsWithoutId(entity.getClass());
         String tableValues = getColumnValuesWithoutId(entity);
-        String insertQuery = String.format("INSERT INTO %s (%s) VALUES (%s)", tableName, tableFields,tableValues);
+        String insertQuery = String.format(INSERT_QUERY, tableName, tableFields, tableValues);
         return connection.prepareStatement(insertQuery).execute();
 
     }
@@ -124,7 +175,7 @@ public class EntityManager<E> implements DBContext<E> {
             Object o = field.get(entity);
             if (o instanceof String || o instanceof LocalDate) {
                 values.add("'" + o + "'");
-            }else {
+            } else {
                 values.add(o.toString());
             }
         }
@@ -161,6 +212,7 @@ public class EntityManager<E> implements DBContext<E> {
         }
         return entities;
     }
+
     private void fillEntity(Class<E> table, ResultSet rs, E entity)
             throws SQLException, IllegalAccessException {
         Field[] fields = table.getDeclaredFields();
@@ -169,6 +221,7 @@ public class EntityManager<E> implements DBContext<E> {
             this.fillField(field, entity, rs, field.getAnnotation(Column.class).name());
         }
     }
+
     private void fillField(Field field, E entity, ResultSet rs, String fieldName)
             throws SQLException, IllegalAccessException {
         if (field.getType() == int.class || field.getType() == Integer.class) {
